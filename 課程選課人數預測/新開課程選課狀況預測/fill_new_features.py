@@ -1,0 +1,162 @@
+import pandas as pd
+import tkinter as tk
+from tkinter import ttk, messagebox
+import os
+import json
+
+# 讀取已清理的資料
+file_path = 'cleaned_course_data.csv'
+data = pd.read_csv(file_path)
+
+# 優化後的關鍵字與細分類特徵映射
+keywords = {
+    '數學_微積分': ['微積分'],
+    '數學_ODE': ['ODE'],
+    '數學_PDE': ['PDE'],
+    '數學_代數': ['代數'],
+    '數學_幾何': ['幾何'],
+    '數學_數值分析': ['數值分析'],
+    '數學_分析': ['分析'],
+    '統計_數據分析': ['數據分析', '分析'],
+    '統計_機率': ['機率'],
+    '統計_時間數列': ['時間數列'],
+    '統計_貝氏統計': ['貝氏'],
+    '電腦科學_深度學習': ['深度學習', '神經網絡'],
+    '電腦科學_演算法': ['演算法', '算法'],
+    '電腦科學_資料結構': ['資料結構'],
+    '電腦科學_人工智慧': ['人工智慧', 'AI'],
+    '電腦科學_程式設計': ['程式設計', '程式'],
+    '電機工程_電路設計': ['電路'],
+    '電機工程_電磁學': ['電磁'],
+    '電機工程_模擬系統': ['模擬'],
+    '測量_測量技術': ['測量'],
+    '測量_地圖繪製': ['地圖'],
+    '測量_GPS定位': ['定位'],
+    '土木_結構設計': ['結構'],
+    '土木_工程施工': ['工程'],
+    '數學_應用線性代數': ['應用線性代數'],
+    '數學_應用幾何': ['應用幾何'],
+    '電腦科學_機器學習': ['機器學習'],
+    '電腦科學_系統設計': ['系統設計'],
+    '電腦科學_網路技術': ['網路技術'],
+    '電機工程_信號處理': ['信號處理'],
+    '法律': ['法律'],
+    '測量_大地測量': ['大地測量'],
+    '測量_遙感探測': ['遙感探測'],
+    '測量_空間資訊': ['空間資訊'],
+    '測量_攝影測量': ['攝影測量'],
+    '統計_迴歸分析': ['迴歸分析'],
+    '統計_抽樣方法': ['抽樣方法'],
+    '統計_多變量分析': ['多變量分析'],
+    '統計_類別資料分析': ['類別資料分析'],
+    '統計_工業應用': ['工業應用'],
+    '統計_統計推論': ['統計推論'],
+    '跨領域': ['跨領域']
+}
+
+# 初始化特徵
+def initialize_features(data, keywords):
+    for feature in keywords.keys():
+        if feature not in data.columns:
+            data[feature] = False
+    return data
+
+# 初始化數據
+data = initialize_features(data, keywords)
+
+# 根據系別分類課程
+departments = {
+    "數學系": data[data['系所名稱'].str.contains('數學', na=False)],
+    "統計系": data[data['系所名稱'].str.contains('統計', na=False)],
+    "資訊系": data[data['系所名稱'].str.contains('資訊', na=False)],
+    "測量系": data[data['系所名稱'].str.contains('測量', na=False)]
+}
+
+# 保存進度檔案
+progress_file = 'progress_math.json'
+
+# 加載進度
+if os.path.exists(progress_file):
+    with open(progress_file, 'r') as f:
+        progress = json.load(f)
+else:
+    progress = {}
+
+# 更新數據標籤
+for course, selected_features in progress.items():
+    for dept in departments.values():
+        if course in dept['科目名稱(連結課程地圖)             備註 \n             限選條件'].values:
+            dept.loc[
+                dept['科目名稱(連結課程地圖)             備註 \n             限選條件'] == course, 
+                selected_features
+            ] = True
+
+# 建立 GUI
+root = tk.Tk()
+root.title("課程特徵選擇器")
+root.geometry("800x600")
+
+# 介面元素
+selected_department = tk.StringVar(value=list(departments.keys())[0])
+selected_course = tk.StringVar()
+
+def load_courses(*args):
+    # 更新課程下拉選單
+    current_department = selected_department.get()
+    course_names = departments[current_department]['科目名稱(連結課程地圖)             備註 \n             限選條件'].drop_duplicates().tolist()
+    dropdown_menu['values'] = course_names
+    selected_course.set("")  # 重置選擇
+
+department_label = tk.Label(root, text="選擇系別:", font=("Arial", 12))
+department_label.pack(pady=10)
+department_menu = ttk.Combobox(root, textvariable=selected_department, values=list(departments.keys()), state="readonly")
+department_menu.pack(pady=10)
+selected_department.trace('w', load_courses)
+
+dropdown_label = tk.Label(root, text="選擇課程名稱:", font=("Arial", 12))
+dropdown_label.pack(pady=10)
+dropdown_menu = ttk.Combobox(root, textvariable=selected_course, values=[], state="readonly", width=50)
+dropdown_menu.pack(pady=10)
+
+feature_vars = {key: tk.BooleanVar() for key in keywords.keys()}
+feature_frame = tk.Frame(root)
+feature_frame.pack(pady=10)
+feature_label = tk.Label(feature_frame, text="選擇相關特徵:")
+feature_label.grid(row=0, column=0, columnspan=2)
+
+columns = 2
+for i, feature in enumerate(keywords.keys()):
+    column = i % columns
+    row = i // columns + 1
+    tk.Checkbutton(feature_frame, text=feature, variable=feature_vars[feature]).grid(row=row, column=column, sticky=tk.W, padx=10)
+
+def update_features():
+    current_department = selected_department.get()
+    course = selected_course.get()
+    if not course:
+        messagebox.showwarning("警告", "請選擇一門課程！")
+        return
+    selected_features = [key for key, var in feature_vars.items() if var.get()]
+    progress[course] = selected_features
+    departments[current_department].loc[
+        departments[current_department]['科目名稱(連結課程地圖)             備註 \n             限選條件'] == course,
+        selected_features
+    ] = True
+    messagebox.showinfo("成功", f"課程 '{course}' 已完成標記！")
+
+def save_data():
+    enhanced_data = pd.concat(departments.values(), ignore_index=True)
+    enhanced_data.to_csv('enhanced_math_course_data.csv', index=False)
+    with open(progress_file, 'w') as f:
+        json.dump(progress, f)
+    messagebox.showinfo("成功", "數據已保存到: enhanced_math_course_data.csv")
+
+button_frame = tk.Frame(root)
+button_frame.pack(pady=10)
+update_button = tk.Button(button_frame, text="更新並標記完成", command=update_features)
+update_button.pack(side=tk.LEFT, padx=5)
+save_button = tk.Button(button_frame, text="保存進度", command=save_data)
+save_button.pack(side=tk.LEFT, padx=5)
+
+load_courses()
+root.mainloop()

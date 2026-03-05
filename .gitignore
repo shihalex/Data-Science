@@ -1,0 +1,25 @@
+*.csv
+*.docx
+*.pptx
+*.pdf
+*.css
+*.js
+*.pkl
+*.json
+*.DS_Store
+/課程選課人數預測/scrapy_dataprocessing_method1~3/combine_data_0113-1
+/課程選課人數預測/scrapy_dataprocessing_method1~3/combine_data_0113-2
+/課程選課人數預測/scrapy_dataprocessing_method1~3/filtered_courses_0113-1
+/課程選課人數預測/scrapy_dataprocessing_method1~3/filtered_courses_0113-2
+/課程選課人數預測/scrapy_dataprocessing_method1~3/not use program
+/課程選課人數預測/scrapy_dataprocessing_method1~3/predicted_results_0113-1
+/課程選課人數預測/scrapy_dataprocessing_method1~3/predicted_results_0113-2
+/課程選課人數預測/scrapy_dataprocessing_method1~3/processed_courses_0113-1
+/課程選課人數預測/scrapy_dataprocessing_method1~3/processed_courses_0113-2
+/課程選課人數預測/scrapy_dataprocessing_method1~3/processed_data_0113-1
+/課程選課人數預測/scrapy_dataprocessing_method1~3/processed_data_0113-2
+/課程選課人數預測/scrapy_dataprocessing_method1~3/raw
+/集成學習應用於二元分類任務/Augmented_data
+/集成學習應用於二元分類任務/Competition_data
+/課程選課人數預測/新開課程選課狀況預測/README.md
+/課程選課人數預測/新開課程選課狀況預測/course_names.txt
