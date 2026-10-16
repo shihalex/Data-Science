@@ -81,9 +81,10 @@
 
 以已選課人數占總名額的比例作為熱門度基礎：
 
-\[
-\text{Popularity Ratio}=\frac{\text{已選課人數}}{\text{已選課人數}+\text{剩餘名額}}
-\]
+$$
+\text{Popularity Ratio} = \frac{\text{已選課人數}}{\text{已選課人數} + \text{剩餘名額}}
+$$
+
 
 - **高熱門度：** 高於第 75 百分位數。
 - **中熱門度：** 介於第 25 與第 75 百分位數。
